@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card p-3 mb-3">
+    <h4>Match Resumes to Job Description</h4>
+    {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+    <form method="post">
+        <div class="mb-3">
+            <textarea class="form-control" name="job_text" rows="5" placeholder="Paste the job description here..."></textarea>
+        </div>
+        <button class="btn btn-primary">Find Top Matches</button>
+    </form>
+</div>
+{% if results %}
+<div class="card p-3 mb-3">
+    <h5>Top Matches</h5>
+    <div class="list-group">
+        {% for r in results %}
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ r.filename }}</strong><br>
+                <small>Matched skills: {{ r.skills | join(', ') }}</small>
+            </div>
+            <div class="text-end">
+                <span class="badge badge-{{ r.category }} p-2 me-2">{{ r.category }}</span><br>
+                <span class="h5">{{ r.percent }}%</span><br>
+                <a class="btn btn-sm btn-outline-secondary mt-2" href="{{ url_for('view_resume', resume_id=r.id) }}?job={{ request.form.get('job_text','')|urlencode }}">View</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h6>Match Distribution</h6>
+            <canvas id="distChart"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h6>Skill Coverage (All Resumes)</h6>
+            <canvas id="skillChart2"></canvas>
+        </div>
+    </div>
+</div>
+<script>
+    const percents = {{ stats.percents | tojson }};
+    new Chart(document.getElementById('distChart'), {
+        type: 'bar',
+        data: { labels: percents.map((v,i)=> 'R'+(i+1)), datasets: [{ label:'Match %', data: percents }] },
+        options: { responsive:true }
+    });
+    const skillCounts = {{ stats.skill_counts | tojson }};
+    const labels = Object.keys(skillCounts).filter(k => skillCounts[k] > 0);
+    const data = labels.map(k => skillCounts[k]);
+    new Chart(document.getElementById('skillChart2'), {
+        type: 'pie',
+        data: { labels: labels, datasets: [{ data: data }] },
+        options: { responsive:true }
+    });
+</script>
+{% endif %}
+{% endblock %}

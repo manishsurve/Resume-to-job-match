@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card p-4">
+    <h4>Upload Resume</h4>
+    <p class="text-muted">Upload PDF, DOCX or TXT resume. Uploaded resumes are stored and indexed.</p>
+    {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+    <form method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <input class="form-control" type="file" name="resume" accept=".pdf,.docx,.txt">
+        </div>
+        <button class="btn btn-primary">Upload</button>
+    </form>
+    <hr>
+    <p class="mb-0">After uploading, go to <a href="{{ url_for('match') }}">Match Resumes</a> or <a href="{{ url_for('dashboard') }}">Dashboard</a>.</p>
+</div>
+{% endblock %}

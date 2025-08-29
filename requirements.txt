@@ -1,0 +1,7 @@
+Flask>=2.0
+scikit-learn>=1.0
+numpy
+pandas
+PyPDF2
+python-docx
+pdfminer.six

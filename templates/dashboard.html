@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>Dashboard</h4>
+    <form class="d-flex" method="get" action="{{ url_for('dashboard') }}">
+        <select class="form-select me-2" name="skill" style="width:200px;">
+            <option value="">Filter by skill (all)</option>
+            {% for s in skills %}
+                <option value="{{ s }}" {% if selected_skill==s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-outline-primary">Filter</button>
+    </form>
+</div>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card p-3 mb-3">
+            <h6>Uploaded Resumes</h6>
+            <div class="row">
+                {% for r in resumes %}
+                <div class="col-md-6 mb-3">
+                    <div class="card p-3 h-100">
+                        <h6 class="mb-1">{{ r.filename }}</h6>
+                        <p class="text-muted small mb-2">{{ r.text[:120] }}...</p>
+                        <a href="{{ url_for('view_resume', resume_id=r.id) }}" class="btn btn-sm btn-outline-secondary">View</a>
+                        <a href="{{ url_for('download', resume_id=r.id) }}" class="btn btn-sm btn-primary">Download</a>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12"><em>No resumes yet.</em></div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3 mb-3">
+            <h6>Skill Coverage</h6>
+            <canvas id="skillChart" height="240"></canvas>
+        </div>
+        <div class="card p-3">
+            <h6>Quick Actions</h6>
+            <a class="btn btn-primary w-100 mb-2" href="{{ url_for('index') }}">Upload Resume</a>
+            <a class="btn btn-outline-primary w-100" href="{{ url_for('match') }}">Match Resumes</a>
+        </div>
+    </div>
+</div>
+<script>
+    const skillCounts = {{ skill_counts | tojson }};
+    const labels = Object.keys(skillCounts).filter(k => skillCounts[k] > 0);
+    const data = labels.map(k => skillCounts[k]);
+    new Chart(document.getElementById('skillChart'), {
+        type: 'bar',
+        data: { labels: labels, datasets: [{ label: 'Count', data: data }] },
+        options: { responsive:true, plugins: { legend: { display:false } } }
+    });
+</script>
+{% endblock %}
